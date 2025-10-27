@@ -1,5 +1,6 @@
 package com.project.btl.repository;
 
+import com.project.btl.model.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

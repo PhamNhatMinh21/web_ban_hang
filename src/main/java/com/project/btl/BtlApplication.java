@@ -1,5 +1,7 @@
+// File: com/project/btl/BtlApplication.java
 package com.project.btl;
 
+import com.project.btl.model.entity.Role; // Sửa import
 import com.project.btl.repository.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,20 +15,23 @@ public class BtlApplication {
         SpringApplication.run(BtlApplication.class, args);
     }
 
-    // --- BƯỚC 2 LÀ THÊM BEAN NÀY ---
-    // Bean này sẽ chạy khi ứng dụng khởi động
-    // Nó kiểm tra và thêm 2 role USER và ADMIN vào DB (vì DB đã bị 'create-drop')
+    // --- SỬA LẠI BEAN NÀY ---
     @Bean
     CommandLineRunner initRoles(RoleRepository roleRepository) {
         return args -> {
             try {
-                // Chỉ thêm nếu Bảng Roles đang trống
-                if (roleRepository.findByName(ERole.ROLE_USER).isEmpty()) {
-                    roleRepository.save(new Role(ERole.ROLE_USER));
+                // 1. Dùng findByRoleName (giống như trong Repository)
+                // 2. Dùng chuỗi "USER" và "ADMIN" (giống như trong AuthService)
+                if (roleRepository.findByRoleName("USER").isEmpty()) {
+                    Role userRole = new Role();
+                    userRole.setRoleName("USER"); // Sửa
+                    roleRepository.save(userRole);
                     System.out.println("--- Created ROLE_USER ---");
                 }
-                if (roleRepository.findByName(ERole.ROLE_ADMIN).isEmpty()) {
-                    roleRepository.save(new Role(ERole.ROLE_ADMIN));
+                if (roleRepository.findByRoleName("ADMIN").isEmpty()) {
+                    Role adminRole = new Role();
+                    adminRole.setRoleName("ADMIN"); // Sửa
+                    roleRepository.save(adminRole);
                     System.out.println("--- Created ROLE_ADMIN ---");
                 }
             } catch (Exception e) {
@@ -34,6 +39,4 @@ public class BtlApplication {
             }
         };
     }
-    // --- KẾT THÚC BEAN INIT ROLES ---
 }
-
