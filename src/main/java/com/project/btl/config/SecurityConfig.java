@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         // BỔ SUNG: API public cho Banner
                         .requestMatchers(HttpMethod.GET, "/api/v1/banners/active").permitAll()
-
+                        .requestMatchers(HttpMethod.POST, "/api/v1/cart/active").permitAll()
                         // === API cần xác thực (Phải có token) ===
                         .requestMatchers("/api/v1/orders/**").authenticated()
 
