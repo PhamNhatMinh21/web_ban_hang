@@ -70,17 +70,17 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartResponse buildCartResponse(Cart cart) {
-        // Cần reload cart từ DB để lấy danh sách items mới nhất
-        Cart updatedCart = cartRepository.findById(cart.getCartId()) // Giả định có getCartId()
+
+        Cart updatedCart = cartRepository.findById(cart.getCartId())
                 .orElse(cart);
 
-        // Giả định Entity Cart có @OneToMany List<CartItem> tên là 'cartItems'
+
         List<CartItem> cartItems = updatedCart.getCartItems();
 
         int total = 0;
         if (cartItems != null) {
             total = cartItems.stream()
-                    .mapToInt(CartItem::getQuantity) // Giả định có getQuantity()
+                    .mapToInt(CartItem::getQuantity)
                     .sum();
         }
 
