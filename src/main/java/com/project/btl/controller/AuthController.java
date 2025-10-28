@@ -20,6 +20,8 @@ public class AuthController {
 
     private final AuthService authService;
 
+
+
     /**
      * API để đăng ký tài khoản mới
      * Frontend gọi: POST http://localhost:8080/api/v1/auth/register
