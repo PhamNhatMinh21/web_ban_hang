@@ -40,8 +40,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         // BỔ SUNG: API public cho Banner
                         .requestMatchers(HttpMethod.GET, "/api/v1/banners/active").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/cart/active").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         // === API cần xác thực (Phải có token) ===
+                        .requestMatchers("/api/cart/**").authenticated()
                         .requestMatchers("/api/v1/orders/**").authenticated()
 
                         // === API cần quyền ADMIN ===
@@ -49,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/products").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
+
                         // BỔ SUNG: API admin cho Banner
                         .requestMatchers("/api/v1/banners/admin/**").hasAuthority("ROLE_ADMIN")
 
