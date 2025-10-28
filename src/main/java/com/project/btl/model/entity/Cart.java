@@ -25,4 +25,8 @@ public class Cart {
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartItem> items = new HashSet<>();
+
+    public List<CartItem> getCartItems() {
+        return new ArrayList<>(this.items);
+    }
 }
