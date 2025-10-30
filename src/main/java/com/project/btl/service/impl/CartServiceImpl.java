@@ -1,5 +1,4 @@
 package com.project.btl.service.impl;
-
 import com.project.btl.dto.request.CartItemRequest;
 import com.project.btl.dto.response.CartResponse;
 import com.project.btl.service.CartService;
@@ -14,10 +13,8 @@ import com.project.btl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
-
 import java.util.List;
 import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
@@ -25,17 +22,14 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductVariantRepository variantRepository;
     private final UserRepository userRepository;
-
     @Override
     @Transactional
     public CartResponse additemtoCart(Integer userId, CartItemRequest request) {
         Cart cart = findOrCreateCart(userId);
-
+// SỬA: Dùng getVariantID() của request thay vì getVariantId() (khớp với CartItemRequest)
         ProductVariant variant = variantRepository.findBySku(request.getVariantID())
                 .orElseThrow(() -> new RuntimeException("Product Variant (SKU) not found"));
-
         Optional<CartItem> existingItemOpt = cartItemRepository.findByCartAndVariant(cart, variant);
-
         if (existingItemOpt.isPresent()) {
             CartItem existingItem = existingItemOpt.get();
             existingItem.setQuantity(existingItem.getQuantity() + request.getQuantity());
@@ -47,15 +41,11 @@ public class CartServiceImpl implements CartService {
             newItem.setQuantity(request.getQuantity());
             cartItemRepository.save(newItem);
         }
-
-        // SỬA: Dùng hàm tính tổng mới
         return buildCartResponse(cart);
     }
-
     private Cart findOrCreateCart(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         return cartRepository.findByUser(user)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
@@ -63,15 +53,19 @@ public class CartServiceImpl implements CartService {
                     return cartRepository.save(newCart);
                 });
     }
-
-    // SỬA: Thay đổi hàm tính tổng để sử dụng Repository mới
     private CartResponse buildCartResponse(Cart cart) {
-        // Sử dụng truy vấn trực tiếp từ Repository để tính tổng
-        Integer total = cartItemRepository.sumTotalItemsByCartId(cart.getCartId());
-
+// Fix: findById để đảm bảo Cart được load lại (nếu cần)
+        Cart updatedCart = cartRepository.findById(cart.getCartId())
+                .orElse(cart);
+        List<CartItem> cartItems = updatedCart.getCartItems();
+        int total = 0;
+        if (cartItems != null) {
+            total = cartItems.stream()
+                    .mapToInt(CartItem::getQuantity)
+                    .sum();
+        }
         CartResponse response = new CartResponse();
-        // Nếu total là NULL (giỏ hàng trống), gán 0
-        response.totalItems = (total != null) ? total : 0;
+        response.totalItems = total;
         return response;
     }
 }
