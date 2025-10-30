@@ -11,7 +11,6 @@ import com.project.btl.repository.CartItemRepository;
 import com.project.btl.repository.CartRepository;
 import com.project.btl.repository.ProductVariantRepository;
 import com.project.btl.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
@@ -22,7 +21,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
-
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductVariantRepository variantRepository;
@@ -31,12 +29,10 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse additemtoCart(Integer userId, CartItemRequest request) {
-
         Cart cart = findOrCreateCart(userId);
 
         ProductVariant variant = variantRepository.findBySku(request.getVariantID())
                 .orElseThrow(() -> new RuntimeException("Product Variant (SKU) not found"));
-
 
         Optional<CartItem> existingItemOpt = cartItemRepository.findByCartAndVariant(cart, variant);
 
@@ -52,10 +48,9 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.save(newItem);
         }
 
-
-        return  buildCartResponse(cart);
+        // SỬA: Dùng hàm tính tổng mới
+        return buildCartResponse(cart);
     }
-
 
     private Cart findOrCreateCart(Integer userId) {
         User user = userRepository.findById(userId)
@@ -69,24 +64,14 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
+    // SỬA: Thay đổi hàm tính tổng để sử dụng Repository mới
     private CartResponse buildCartResponse(Cart cart) {
-
-        Cart updatedCart = cartRepository.findById(cart.getCartId())
-                .orElse(cart);
-
-
-        List<CartItem> cartItems = updatedCart.getCartItems();
-
-        int total = 0;
-        if (cartItems != null) {
-            total = cartItems.stream()
-                    .mapToInt(CartItem::getQuantity)
-                    .sum();
-        }
+        // Sử dụng truy vấn trực tiếp từ Repository để tính tổng
+        Integer total = cartItemRepository.sumTotalItemsByCartId(cart.getCartId());
 
         CartResponse response = new CartResponse();
-        response.totalItems = total;
-
+        // Nếu total là NULL (giỏ hàng trống), gán 0
+        response.totalItems = (total != null) ? total : 0;
         return response;
     }
 }

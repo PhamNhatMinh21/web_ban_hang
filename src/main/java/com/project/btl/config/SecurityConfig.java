@@ -1,6 +1,4 @@
-// File: com/project/btl/config/SecurityConfig.java
 package com.project.btl.config;
-
 import com.project.btl.service.impl.UserAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,67 +16,65 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Cho phép dùng @PreAuthorize (phân quyền theo role)
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserAuthService userAuthService;
-
-
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Tắt CSRF vì dùng API (stateless)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // === API công khai (Không cần token) ===
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
-                        // BỔ SUNG: API public cho Banner
-                        .requestMatchers(HttpMethod.GET, "/api/v1/banners/active").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        // === API cần xác thực (Phải có token) ===
-                        .requestMatchers("/api/cart/**").authenticated()
-                        .requestMatchers("/api/v1/orders/**").authenticated()
-
-                        // === API cần quyền ADMIN ===
-                        // SỬA: Thêm tiền tố "ROLE_" để khớp với getAuthorities() trong User.java
-                        .requestMatchers(HttpMethod.POST, "/api/v1/products").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
-
-                        // BỔ SUNG: API admin cho Banner
-                        .requestMatchers("/api/v1/banners/admin/**").hasAuthority("ROLE_ADMIN")
-
-                        .anyRequest().authenticated() // Tất cả các API còn lại đều cần xác thực
+// === API công khai (Không cần token) ===
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/banners/active").permitAll()
+// === API cần xác thực (Phải có token) ===
+                                .requestMatchers("/api/v1/orders/**").authenticated()
+// ĐÃ SỬA: Bảo vệ các API giỏ hàng (kiểm tra CartController đã sửa đường dẫn)
+                                .requestMatchers("/api/v1/cart/**").authenticated()
+// === API cần quyền ADMIN ===
+                                .requestMatchers(HttpMethod.POST, "/api/v1/products").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers("/api/v1/banners/admin/**").hasAuthority("ROLE_ADMIN")
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không dùng session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Thêm filter JWT
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
-    // Định nghĩa Bean mã hóa mật khẩu
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    // Định nghĩa Bean cung cấp cách xác thực
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userAuthService); // Dùng service tải user
-        authProvider.setPasswordEncoder(passwordEncoder()); // Dùng bean mã hóa
+        authProvider.setUserDetailsService(userAuthService);
+        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-
-    // Bean này dùng trong lúc Login
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

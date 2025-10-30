@@ -1,9 +1,7 @@
 // File: com/project/btl/dto/response/BannerResponse.java
 package com.project.btl.dto.response;
-
 import lombok.Builder;
 import lombok.Data;
-
 @Data
 @Builder
 public class BannerResponse {
