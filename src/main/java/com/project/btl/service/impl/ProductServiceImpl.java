@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.function.Function; // BỔ SUNG
 import java.util.stream.Collectors;
 @Service
+
 @RequiredArgsConstructor // Sẽ tự động tiêm 4 repository bên dưới
 public class ProductServiceImpl implements ProductService { // <- "implements" ProductService
     private final ProductRepository productRepository;

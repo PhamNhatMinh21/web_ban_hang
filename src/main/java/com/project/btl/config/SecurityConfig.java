@@ -4,7 +4,7 @@ import com.project.btl.service.impl.UserAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // <-- ĐẢM BẢO IMPORT
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -21,10 +21,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays; // <-- SỬA: Dùng Arrays.asList
+import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.security.config.Customizer.withDefaults; // <-- BỔ SUNG IMPORT
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -32,24 +32,19 @@ import static org.springframework.security.config.Customizer.withDefaults; // <-
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    // THÊM DÒNG NÀY (QUAN TRỌNG!)
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserAuthService userAuthService;
 
-    // Bean này định nghĩa cấu hình CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Cho phép frontend (port 3000) truy cập
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        // Cho phép các method
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
-        // Cho phép các header (quan trọng là 'Authorization' và 'Content-Type')
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
-        // Cho phép gửi cookie/token
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Áp dụng cấu hình này cho TẤT CẢ các đường dẫn
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
@@ -57,39 +52,35 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // SỬA: Dùng .cors(withDefaults()) để BẬT bean corsConfigurationSource ở trên
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-
-                        // SỬA: THÊM DÒNG NÀY ĐỂ FIX LỖI CORS 403
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // === API công khai (Không cần token) ===
+                        // 1. PUBLIC
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/banners/active").permitAll()
 
-                        // === API cần xác thực (Phải có token) ===
-                        .requestMatchers("/api/v1/orders/**").authenticated()
-                        .requestMatchers("/api/v1/cart/**").authenticated()
-
-                        // === API cần quyền ADMIN ===
+                        // 2. ADMIN APIs – PHẢI ĐẶT TRƯỚC anyRequest()
                         .requestMatchers(HttpMethod.POST, "/api/v1/products").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/v1/banners/admin/**").hasAuthority("ROLE_ADMIN")
 
+                        // 3. USER APIs
+                        .requestMatchers("/api/v1/orders/**").authenticated()
+                        .requestMatchers("/api/v1/cart/**").authenticated()
+
+                        // 4. MỌI THỨ CÒN LẠI
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
-    // (Các bean còn lại giữ nguyên)
+    // Các bean khác giữ nguyên
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
