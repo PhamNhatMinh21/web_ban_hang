@@ -1,3 +1,4 @@
+// File: com/project/btl/dto/request/CreateProductRequest.java
 package com.project.btl.dto.request;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
