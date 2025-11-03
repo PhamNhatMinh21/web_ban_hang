@@ -21,4 +21,6 @@ public interface OrderService {
      * Hủy một đơn hàng
      */
     OrderResponse cancelOrder(Integer orderId);
+    List<OrderResponse> getAllOrders();
+    List<OrderResponse> getOrdersByUserId(Integer userId);
 }

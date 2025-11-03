@@ -2,12 +2,18 @@
 package com.project.btl.controller;
 import com.project.btl.dto.request.CreateOrderRequest;
 import com.project.btl.dto.response.OrderResponse;
+import com.project.btl.model.entity.User;
 import com.project.btl.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
@@ -45,4 +51,21 @@ public class OrderController {
 // (Sau này sẽ thêm API lấy lịch sử đơn hàng của User)
 // @GetMapping("/my-orders")
 // public ResponseEntity<List<OrderResponse>> getMyOrders() { ... }
+@GetMapping
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")// Chỉ ADMIN mới được gọi
+public ResponseEntity<List<OrderResponse>> getAllOrders() {
+    List<OrderResponse> orders = orderService.getAllOrders();
+    return ResponseEntity.ok(orders);
+}
+
+    /**
+     * [USER] API để lấy lịch sử đơn hàng
+     * Frontend gọi: GET http://localhost:8080/api/v1/orders/my-orders
+     */
+    @GetMapping("/my-orders")
+    public ResponseEntity<List<OrderResponse>> getMyOrders(@AuthenticationPrincipal User user) {
+        Integer userId = user.getUserId();
+        List<OrderResponse> orders = orderService.getOrdersByUserId(userId);
+        return ResponseEntity.ok(orders);
+    }
 }

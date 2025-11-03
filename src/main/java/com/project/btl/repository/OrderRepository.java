@@ -9,4 +9,5 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     // Tìm các đơn hàng của một user cụ thể
     List<Order> findByUserOrderByCreatedAtDesc(User user);
+    List<Order> findAllByOrderByCreatedAtDesc();
 }
