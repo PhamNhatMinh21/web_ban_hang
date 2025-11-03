@@ -10,4 +10,5 @@ public interface CartService {
 
     // Dùng SKU (string) để xóa
     CartResponse removeItemFromCart(Integer userId, String sku);
+    void clearCart(Integer userId);
 }

@@ -11,20 +11,20 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/cart") // [cite: 235]
+@RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
 public class CartController {
 
     private final CartService cartService;
 
-    @PostMapping("/add") // [cite: 239]
+    @PostMapping("/add")
     public ResponseEntity<CartResponse> addItemToCart(@AuthenticationPrincipal User user , @RequestBody CartItemRequest request){
         Integer userId = user.getUserId();
         CartResponse updatedCart = cartService.additemtoCart(userId, request);
         return ResponseEntity.ok(updatedCart);
     }
 
-    @GetMapping // [cite: 246]
+    @GetMapping
     public ResponseEntity<CartResponse> getMyCart(@AuthenticationPrincipal User user) {
         if (user == null) {
             return ResponseEntity.status(401).build();
@@ -34,38 +34,36 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
-    // --- BỔ SUNG 2 ENDPOINT NÀY ---
-
-    /**
-     * API để cập nhật số lượng item
-     * Frontend gọi: PUT http://localhost:8080/api/v1/cart/update
-     * Body: { "variantID": "SKU_123", "quantity": 3 }
-     */
     @PutMapping("/update")
     public ResponseEntity<CartResponse> updateItemQuantity(
             @AuthenticationPrincipal User user,
-            @RequestBody CartItemRequest request) { // Dùng lại CartItemRequest
+            @RequestBody CartItemRequest request) {
 
         Integer userId = user.getUserId();
         CartResponse updatedCart = cartService.updateItemQuantity(userId, request);
         return ResponseEntity.ok(updatedCart);
     }
 
-    /**
-     * API để xóa item
-     * Frontend gọi: DELETE http://localhost:8080/api/v1/cart/remove/SKU_123
-     */
     @DeleteMapping("/remove/{sku}")
     public ResponseEntity<CartResponse> removeItemFromCart(
             @AuthenticationPrincipal User user,
-            @PathVariable String sku) { // Lấy SKU từ đường dẫn
+            @PathVariable String sku) {
 
         Integer userId = user.getUserId();
         CartResponse updatedCart = cartService.removeItemFromCart(userId, sku);
         return ResponseEntity.ok(updatedCart);
     }
 
-    // (Bạn cũng nên thêm 1 API để xóa sạch giỏ hàng)
-    // @DeleteMapping("/clear")
-    // ...
+    // === THÊM ENDPOINT NÀY ===
+    /**
+     * API để xóa sạch giỏ hàng (sau khi checkout)
+     * Frontend gọi: DELETE http://localhost:8080/api/v1/cart/clear
+     */
+    @DeleteMapping("/clear")
+    public ResponseEntity<Void> clearCart(@AuthenticationPrincipal User user) {
+        Integer userId = user.getUserId();
+        cartService.clearCart(userId);
+        // Trả về 200 OK không cần body
+        return ResponseEntity.ok().build();
+    }
 }

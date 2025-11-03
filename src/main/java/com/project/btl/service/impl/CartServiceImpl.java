@@ -2,16 +2,13 @@
 package com.project.btl.service.impl;
 
 // ... (Các import khác giữ nguyên)
-// BỔ SUNG IMPORT:
 import com.project.btl.dto.request.CartItemRequest;
 import com.project.btl.dto.response.CartResponse;
 import com.project.btl.exception.ResourceNotFoundException;
 import com.project.btl.dto.response.CartItemResponse;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import com.project.btl.model.entity.*;
 import com.project.btl.repository.CartItemRepository;
 import com.project.btl.repository.CartRepository;
@@ -31,6 +28,7 @@ public class CartServiceImpl implements CartService {
     private final ProductVariantRepository variantRepository;
     private final UserRepository userRepository;
 
+    // ... (Các hàm additemtoCart, getCart, updateItemQuantity, removeItemFromCart giữ nguyên) ...
     @Override
     @Transactional
     public CartResponse additemtoCart(Integer userId, CartItemRequest request) {
@@ -61,8 +59,6 @@ public class CartServiceImpl implements CartService {
         Cart cart = findOrCreateCart(userId);
         return buildCartResponse(cart);
     }
-
-    // --- BỔ SUNG CÁC HÀM MỚI ---
 
     @Override
     @Transactional
@@ -104,8 +100,21 @@ public class CartServiceImpl implements CartService {
     }
 
 
-    // --- CÁC HÀM HELPER (Private) ---
+    // === THÊM HÀM MỚI NÀY ===
+    @Override
+    @Transactional
+    public void clearCart(Integer userId) {
+        // 1. Tìm giỏ hàng của user
+        Cart cart = findCartByUserId(userId);
 
+        // 2. Xóa tất cả các CartItem liên quan đến giỏ hàng này
+        // (Bạn cần thêm hàm deleteByCart vào CartItemRepository)
+        cartItemRepository.deleteByCart(cart);
+    }
+    // === HẾT THÊM MỚI ===
+
+
+    // --- CÁC HÀM HELPER (Private) ---
     private Cart findOrCreateCart(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
@@ -117,28 +126,23 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
-    // BỔ SUNG HÀM NÀY: Chỉ tìm, không tạo mới
     private Cart findCartByUserId(Integer userId) {
-        // Dùng phương thức findByUser_UserId mà bạn đã cung cấp [cite: 1452]
         return cartRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user ID: " + userId));
     }
 
-    // THAY THẾ HÀM NÀY (để trả về 'items' cho frontend)
     private CartResponse buildCartResponse(Cart cart) {
+        // ... (code hàm này giữ nguyên)
         Cart updatedCart = cartRepository.findById(cart.getCartId())
                 .orElse(cart);
 
-        // Dùng findByCart (từ CartItemRepository)
         List<CartItem> cartItems = cartItemRepository.findByCart(updatedCart);
 
-        // --- LOGIC MAP (CHUYỂN ĐỔI) ---
         List<CartItemResponse> itemResponses = cartItems.stream()
                 .map(item -> {
                     ProductVariant variant = item.getVariant();
                     Product product = variant.getProduct();
 
-                    // (Code lấy ảnh, bạn có thể sửa sau)
                     String imageUrl = (product.getImages() != null && !product.getImages().isEmpty())
                             ? product.getImages().stream().findFirst().map(ProductImage::getImageUrl).orElse(null)
                             : null;
@@ -147,7 +151,6 @@ public class CartServiceImpl implements CartService {
                             .variantId(variant.getVariantId())
                             .sku(variant.getSku())
                             .name(product.getName() + " - " + variant.getName()) // Ghép tên
-                            // (Cần sửa logic giá: Lấy giá từ CartItem thay vì Variant)
                             .price(variant.getPrice())
                             .quantity(item.getQuantity())
                             .image(imageUrl)
@@ -159,7 +162,6 @@ public class CartServiceImpl implements CartService {
                 .mapToInt(CartItemResponse::getQuantity)
                 .sum();
 
-        // Trả về response đầy đủ
         return CartResponse.builder()
                 .totalItems(total)
                 .items(itemResponses)
