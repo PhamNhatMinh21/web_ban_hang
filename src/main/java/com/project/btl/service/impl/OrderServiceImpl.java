@@ -105,6 +105,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return convertToOrderResponse(order);
     }
+
     @Override
     @Transactional
     public OrderResponse cancelOrder(Integer orderId) {
@@ -188,5 +189,30 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(order.getCreatedAt())
                 .orderDetails(detailResponses)
                 .build();
+    }
+    @Override
+    @Transactional
+    public OrderResponse updateOrderStatus(Integer orderId, com.project.btl.model.enums.OrderStatus newStatus) {
+        // 1. Tìm đơn hàng
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng ID: " + orderId));
+
+        // 2. Xử lý logic tồn kho (Chỉ khi chuyển sang HỦY, cần hoàn lại tồn kho)
+        // Nếu Backend có trạng thái 'SHIPPING' hoặc 'PROCESSING', bạn nên thêm logic tương ứng ở đây
+        if (newStatus == com.project.btl.model.enums.OrderStatus.CANCELLED && order.getStatus() != com.project.btl.model.enums.OrderStatus.CANCELLED) {
+            // Chỉ hoàn lại kho nếu trạng thái cũ chưa phải là Hủy
+            for (OrderDetail detail : order.getOrderDetails()) {
+                ProductVariant variant = detail.getVariant();
+                variant.setStockQuantity(variant.getStockQuantity() + detail.getQuantity());
+                productVariantRepository.save(variant);
+            }
+        }
+
+        // 3. Cập nhật trạng thái
+        order.setStatus(newStatus);
+
+        // 4. Lưu và trả về
+        Order updatedOrder = orderRepository.save(order);
+        return convertToOrderResponse(updatedOrder);
     }
 }

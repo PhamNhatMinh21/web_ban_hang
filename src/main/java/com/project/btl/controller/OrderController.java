@@ -1,6 +1,7 @@
 // File: com/project/btl/controller/OrderController.java
 package com.project.btl.controller;
 import com.project.btl.dto.request.CreateOrderRequest;
+import com.project.btl.dto.request.UpdateOrderStatusRequest;
 import com.project.btl.dto.response.OrderResponse;
 import com.project.btl.model.entity.User;
 import com.project.btl.service.OrderService;
@@ -48,9 +49,7 @@ public class OrderController {
         OrderResponse cancelledOrder = orderService.cancelOrder(id);
         return ResponseEntity.ok(cancelledOrder);
     }
-// (Sau này sẽ thêm API lấy lịch sử đơn hàng của User)
-// @GetMapping("/my-orders")
-// public ResponseEntity<List<OrderResponse>> getMyOrders() { ... }
+
 @GetMapping
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")// Chỉ ADMIN mới được gọi
 public ResponseEntity<List<OrderResponse>> getAllOrders() {
@@ -58,14 +57,18 @@ public ResponseEntity<List<OrderResponse>> getAllOrders() {
     return ResponseEntity.ok(orders);
 }
 
-    /**
-     * [USER] API để lấy lịch sử đơn hàng
-     * Frontend gọi: GET http://localhost:8080/api/v1/orders/my-orders
-     */
     @GetMapping("/my-orders")
     public ResponseEntity<List<OrderResponse>> getMyOrders(@AuthenticationPrincipal User user) {
         Integer userId = user.getUserId();
         List<OrderResponse> orders = orderService.getOrdersByUserId(userId);
         return ResponseEntity.ok(orders);
+    }
+    @PutMapping("/admin/{id}/status")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<OrderResponse> updateOrderStatus(
+            @PathVariable Integer id,
+            @RequestBody UpdateOrderStatusRequest request) { // Cần tạo DTO này
+        OrderResponse updatedOrder = orderService.updateOrderStatus(id, request.getNewStatus());
+        return ResponseEntity.ok(updatedOrder);
     }
 }
