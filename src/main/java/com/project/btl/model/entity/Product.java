@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 @Getter
 @Setter
@@ -32,7 +33,7 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductVariant> variants;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ProductImage> images;
+    private List<ProductImage> images;
     @OneToMany(mappedBy = "product")
     private Set<Review> reviews;
     @PrePersist
@@ -44,4 +45,5 @@ public class Product {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
 }
