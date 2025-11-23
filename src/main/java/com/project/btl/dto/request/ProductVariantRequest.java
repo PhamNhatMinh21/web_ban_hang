@@ -16,4 +16,5 @@ public class ProductVariantRequest {
     @NotNull(message = "Số lượng tồn kho không được để trống")
     @Min(value = 0, message = "Tồn kho không thể âm")
     private int stockQuantity;
+    private String imageUrl;
 }
