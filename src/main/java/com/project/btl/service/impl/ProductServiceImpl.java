@@ -215,7 +215,16 @@ public class ProductServiceImpl implements ProductService {
             thumbnail = product.getImages().get(0).getImageUrl();
             gallery = product.getImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toList());
         }
+        Integer catId = null;
+        Integer parentCatId = null;
 
+        if (product.getCategory() != null) {
+            catId = product.getCategory().getCategoryId();
+            // Kiểm tra nếu có danh mục cha thì lấy ID cha
+            if (product.getCategory().getParent() != null) {
+                parentCatId = product.getCategory().getParent().getCategoryId();
+            }
+        }
         return ProductResponse.builder()
                 .productId(product.getProductId())
                 .name(product.getName())
@@ -227,6 +236,9 @@ public class ProductServiceImpl implements ProductService {
                 .totalReviews((Long) stats.get("totalReviews"))
                 .thumbnail(thumbnail)
                 .gallery(gallery)
+                .categoryName(product.getCategory() != null ? product.getCategory().getName() : "")
+                .categoryId(catId)
+                .parentCategoryId(parentCatId)
                 .build();
     }
 }

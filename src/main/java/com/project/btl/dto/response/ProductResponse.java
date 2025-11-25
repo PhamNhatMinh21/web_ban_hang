@@ -14,6 +14,8 @@ public class ProductResponse {
     private List<ProductVariantResponse> variants;
     private Double averageRating;
     private Long totalReviews;
-    private String thumbnail;      // Ảnh đại diện
+    private String thumbnail;
     private List<String> gallery;
+    private Integer categoryId;
+    private Integer parentCategoryId;
 }
