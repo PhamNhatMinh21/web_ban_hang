@@ -18,7 +18,7 @@
     <name>btl</name>
     <description>btl</description>
     <properties>
-        <java.version>21</java.version> <!-- Đảm bảo bạn đã cài JDK 21 -->
+        <java.version>17</java.version> <!-- Đảm bảo bạn đã cài JDK 21 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
