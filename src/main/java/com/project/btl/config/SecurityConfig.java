@@ -59,7 +59,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     
                     // --- QUAN TRỌNG: THÊM CÁI NÀY ĐỂ KHỚP VỚI FRONTEND CỦA BẠN ---
-                    .requestMatchers(HttpMethod.GET, "/products/**").permitAll() 
+                
                     .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                     // -------------------------------------------------------------
 
