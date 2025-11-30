@@ -1,0 +1,5 @@
+{
+  "name": "Gymstore Homepage Clone",
+  "description": "A functional and visually appealing clone of the Gymstore.vn homepage, built with React, TypeScript, and Tailwind CSS. It showcases various e-commerce UI components like product carousels, flash sales, and categorized listings.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GymSup - Thực phẩm bổ sung chính hãng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'gym-yellow': '#ffd100',
+              'gym-dark': '#1a1a1a',
+              'gym-darker': '#111111',
+              'gym-gray': '#a0a0a0',
+            },
+            fontFamily: {
+              'sans': ['Inter', 'sans-serif'],
+            },
+            keyframes: {
+              'cart-bump': {
+                '0%': { transform: 'scale(1)' },
+                '30%': { transform: 'scale(1.4)' },
+                '50%': { transform: 'scale(0.9)' },
+                '100%': { transform: 'scale(1)' },
+              },
+              'fade-in': {
+                '0%': { opacity: '0', transform: 'translateY(-10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            },
+            animation: {
+              'cart-bump': 'cart-bump 0.5s ease-in-out',
+              'fade-in': 'fade-in 0.3s ease-out',
+            }
+          },
+        },
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      /* Main Site Theme Overrides */
+      .theme-light {
+        --bg-main: #f9fafb; /* gray-50 */
+        --bg-card: #ffffff;
+        --text-main: #111827; /* gray-900 */
+        --text-secondary: #6b7280; /* gray-500 */
+        --border-color: #e5e7eb; /* gray-200 */
+        --header-bg: #ffffff;
+      }
+      .theme-light body { background-color: var(--bg-main) !important; color: var(--text-main) !important; }
+      .theme-light .bg-gym-darker { background-color: var(--header-bg) !important; }
+      .theme-light header.bg-gym-darker { border-bottom: 1px solid var(--border-color); }
+      .theme-light .bg-gym-dark { background-color: var(--bg-card) !important; }
+      .theme-light .text-white { color: var(--text-main) !important; }
+      .theme-light .text-gym-darker, .theme-light .text-gym-dark { color: #1f2937 !important; }
+      .theme-light .text-gym-gray { color: var(--text-secondary) !important; }
+      .theme-light .border-gray-800, .theme-light .border-gray-700, .theme-light .border-gray-600 { border-color: var(--border-color) !important; }
+      .theme-light .hover\:text-white:hover { color: #000 !important; }
+      .theme-light input, .theme-light select { background-color: #f3f4f6 !important; border-color: var(--border-color) !important; color: var(--text-main) !important; }
+      .theme-light input::placeholder { color: #9ca3af !important; }
+      .theme-light .shadow-black\/20 { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important; }
+      .theme-light .hover\:shadow-gym-yellow\/20:hover { box-shadow: 0 10px 15px -3px rgba(255,209,0,0.2), 0 4px 6px -4px rgba(255,209,0,0.2) !important; }
+      .theme-light .grayscale { filter: grayscale(0) !important; }
+      .theme-light .hover\:grayscale-0:hover { filter: grayscale(0) !important; }
+      .theme-light .bg-opacity-70 { background-color: rgba(229, 231, 235, 0.7) !important; } /* gray-200 */
+      .theme-light .hover\:bg-opacity-90:hover { background-color: rgba(229, 231, 235, 0.9) !important; }
+      .theme-light .lg\:col-span-1 aside { border: 1px solid var(--border-color) !important; }
+
+      .theme-black {
+        --bg-main: #000000;
+        --bg-card: #111111;
+        --bg-header: #0a0a0a;
+      }
+      .theme-black body { background-color: var(--bg-main) !important; }
+      .theme-black .bg-gym-darker { background-color: var(--bg-header) !important; }
+      .theme-black .bg-gym-dark { background-color: var(--bg-card) !important; }
+      
+      /* Admin Panel Theme Variables */
+      body {
+        --admin-bg-main: #111111;
+        --admin-bg-sidebar: #1a1a1a;
+        --admin-bg-card: #1a1a1a;
+        --admin-bg-hover: #2a2a2a;
+        --admin-text-main: #ffffff;
+        --admin-text-secondary: #a0a0a0;
+        --admin-text-accent: #ffd100;
+        --admin-text-accent-strong: #000000;
+        --admin-bg-accent: #ffd100;
+        --admin-border-color: #333333;
+        --admin-button-bg: #ffd100;
+        --admin-button-text: #111111;
+      }
+      body.admin-theme-light {
+        --admin-bg-main: #f3f4f6;
+        --admin-bg-sidebar: #ffffff;
+        --admin-bg-card: #ffffff;
+        --admin-bg-hover: #f3f4f6;
+        --admin-text-main: #1f2937;
+        --admin-text-secondary: #6b7280;
+        --admin-text-accent: #eab308; /* yellow-500 */
+        --admin-text-accent-strong: #ca8a04; /* yellow-600 */
+        --admin-bg-accent: #fef9c3; /* yellow-50 */
+        --admin-border-color: #e5e7eb;
+        --admin-button-bg: #f59e0b; /* amber-500 */
+        --admin-button-text: #ffffff;
+      }
+      body.admin-theme-black {
+        --admin-bg-main: #000000;
+        --admin-bg-sidebar: #0a0a0a;
+        --admin-bg-card: #111111;
+        --admin-bg-hover: #1f1f1f;
+        --admin-text-main: #ffffff;
+        --admin-text-secondary: #a0a0a0;
+        --admin-text-accent: #ffd100;
+        --admin-text-accent-strong: #000000;
+        --admin-bg-accent: #ffd100;
+        --admin-border-color: #2b2b2b;
+        --admin-button-bg: #ffd100;
+        --admin-button-text: #111111;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/google-genai-v0.15.0/index.js",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^18.2.0/",
+    "react/": "https://aistudiocdn.com/react@^18.2.0/",
+    "react": "https://aistudiocdn.com/react@^18.2.0"
+  }
+}
+</script>
+
+</head>
+  <body class="bg-gym-darker text-white">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
